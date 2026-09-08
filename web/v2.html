@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PyPocket LM — browser Python model</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar"><div class="brand"><span class="mark">›_</span><span>PyPocket <b>LM</b></span></div><span class="status"><i></i> browser-local inference</span></header>
+  <main class="shell">
+  <section class="hero"><p class="eyebrow">PYTHON-SPECIALIZED · PROMPTS → CODE · ZERO API CALLS</p><h1>A tiny model that<br><em>turns words into Python.</em></h1><p class="lede">An experimental Python generator with a natural-language vocabulary, learned task intents, and compact JSON weights. No account. No server. No prompt leaves this device.</p></section>
+    <section class="workbench">
+      <div class="panel-head"><div><span class="label">Prompt / Python prefix</span><span id="model-status" class="model-status">loading model…</span></div><div><button id="creative" class="copy">Creative IR: off</button> <button id="run" class="run">Generate <span>⌘ ↵</span></button></div></div>
+      <textarea id="prompt" spellcheck="false" placeholder="def greet(name):\n    ">def greet(name):
+    </textarea>
+      <div class="panel-foot"><span>Try a Python prefix, not a natural-language question.</span><span id="stats">—</span></div>
+    </section>
+    <section class="output"><div class="output-head"><span class="label">Generated continuation</span><button id="copy" class="copy">Copy</button></div><pre id="result">Your generated code will appear here.</pre></section>
+    <section class="notes"><article><span class="num">01</span><div><h2>Words become intent</h2><p>Prompt words are learned as reusable signals. “Write a hello world script” can select the same task as a new, unseen phrasing.</p></div></article><article><span class="num">02</span><div><h2>Templates stay parametric</h2><p>Core Python patterns produce real code such as <code>print("Hello, World!")</code>, loops, functions, and list sums.</p></div></article><article><span class="num">03</span><div><h2>Honest prototype</h2><p>Unknown requests fall back to code completion. This is a small explainable model, not a general LLM.</p></div></article></section>
+  </main>
+  <footer>PyPocket LM · open experiment · <a href="https://github.com" target="_blank" rel="noreferrer">GitHub Actions ready</a></footer>
+  <script src="app.js?v=8497e63" type="module"></script>
+</body>
+</html>
