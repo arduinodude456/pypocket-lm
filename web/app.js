@@ -125,9 +125,12 @@ function generateForPrompt(prompt) {
 }
 
 function irNext(history) {
-  const context = history.slice(-(irModel.order - 1)).join('␟');
-  const entries = Object.entries(irModel.transitions[context] || {}).sort((a, b) => b[1] - a[1]);
-  return entries.length ? entries[0][0] : '<END>';
+  for (let width = Math.min(irModel.order - 1, history.length); width > 0; width--) {
+    const context = history.slice(-width).join('␟');
+    const entries = Object.entries(irModel.transitions[context] || {}).sort((a, b) => b[1] - a[1]);
+    if (entries.length) return entries[0][0];
+  }
+  return '<END>';
 }
 
 function compileIR(tokens) {
@@ -156,7 +159,8 @@ function generateCreative(prompt) {
     output.push(token); history.push(token);
     if (token === '<END>') break;
   }
-  return { intent: 'creative-ir', code: compileIR(output) };
+  const code = compileIR(output);
+  return { intent: 'creative-ir', code: code || '# Keine gültige IR-Fortsetzung gefunden. Bitte Prompt vereinfachen.' };
 }
 
 async function loadModel() {
