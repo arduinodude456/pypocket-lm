@@ -1,7 +1,10 @@
-"""A tiny, transparent Python-specialized language model.
+"""PyPocket LM: a tiny Python-specialized model with a prompt-to-code layer.
 
-This module intentionally uses only the Python standard library. It is a
-research prototype, not a replacement for a neural coding model.
+The baseline remains transparent and standard-library-only. It combines:
+1. a Python-aware token n-gram model for code-prefix continuation, and
+2. a tiny trained intent/template layer for natural-language prompts.
+
+This is still a small research model, not a general neural LLM.
 """
 from __future__ import annotations
 
@@ -9,6 +12,7 @@ import argparse
 import json
 import math
 import random
+import re
 import tokenize as py_tokenize
 from collections import Counter, defaultdict
 from io import StringIO
@@ -28,6 +32,12 @@ KEYWORDS = {
     "True", "False", "None",
 }
 BUILTINS = {"print", "len", "range", "int", "str", "float", "list", "dict", "set", "sum", "min", "max"}
+WORD_RE = re.compile(r"[\wäöüß]+", re.IGNORECASE)
+
+
+def normal_tokenize(text: str) -> list[str]:
+    """Tokenize natural-language prompts into reusable lowercase word units."""
+    return [word.casefold() for word in WORD_RE.findall(text)]
 
 
 def tokenize_python(source: str) -> list[str]:
@@ -90,16 +100,12 @@ def detokenize(tokens: Iterable[str]) -> str:
                 lines.append("    " * indent + " ".join(current).strip())
                 current = []
             continue
-        if token.startswith("KW:"):
-            current.append(token[3:])
-        elif token.startswith("FN:"):
-            current.append(token[3:])
+        if token.startswith("KW:") or token.startswith("FN:"):
+            current.append(token.split(":", 1)[1])
         elif token.startswith("OP:"):
             op = token[3:]
             if op in {",", ":", ")", "]", "}"} and current:
                 current[-1] += op
-            elif op in {"(", "[", "{"}:
-                current.append(op)
             else:
                 current.append(op)
         elif token == "NAME:<id>":
@@ -122,6 +128,9 @@ class TinyPythonLM:
         self.order = order
         self.counts: dict[str, Counter[str]] = defaultdict(Counter)
         self.vocab: set[str] = set()
+        self.prompt_vocab: set[str] = set()
+        self.intent_patterns: dict[str, list[str]] = {}
+        self.templates: dict[str, list[str]] = defaultdict(list)
 
     def fit(self, examples: Iterable[str], epochs: int = 1) -> "TinyPythonLM":
         for _ in range(max(1, epochs)):
@@ -133,6 +142,33 @@ class TinyPythonLM:
                     context = "\u241f".join(tokens[start:index]) or "<BOS>"
                     self.counts[context][tokens[index]] += 1
         return self
+
+    def fit_prompts(self, prompt_examples: Iterable[dict]) -> "TinyPythonLM":
+        """Learn a compact natural-language lexicon and intent keyword map."""
+        pattern_counts: dict[str, Counter[str]] = defaultdict(Counter)
+        for example in prompt_examples:
+            intent = str(example["intent"])
+            words = normal_tokenize(str(example["prompt"]))
+            self.prompt_vocab.update(words)
+            for word in set(words):
+                pattern_counts[intent][word] += 1
+            template = str(example["template"])
+            if template not in self.templates[intent]:
+                self.templates[intent].append(template)
+        self.intent_patterns = {intent: [word for word, _ in counts.most_common()] for intent, counts in pattern_counts.items()}
+        return self
+
+    def recognize_intent(self, prompt: str) -> str | None:
+        words = set(normal_tokenize(prompt))
+        best_intent, best_score = None, 0.0
+        for intent, pattern in self.intent_patterns.items():
+            matches = words.intersection(pattern)
+            if not matches:
+                continue
+            score = sum(1.0 / (1.0 + pattern.index(word)) for word in matches)
+            if score > best_score:
+                best_intent, best_score = intent, score
+        return best_intent
 
     def next_token(self, history: list[str], temperature: float = 0.0) -> str:
         context_tokens = history[-(self.order - 1):]
@@ -158,19 +194,41 @@ class TinyPythonLM:
                 break
         return generated
 
+    def generate_for_prompt(self, prompt: str, max_tokens: int = 48) -> dict[str, str | None]:
+        """Generate code from natural language when an intent is recognized."""
+        intent = self.recognize_intent(prompt)
+        if intent and intent in self.templates:
+            candidates = self.templates[intent]
+            words = set(normal_tokenize(prompt))
+            german = words.intersection({"hallo", "welt", "schreibe", "beispiel", "begrüße", "begrüßen", "summe", "schleife"})
+            preferred = [candidate for candidate in candidates if ("Hallo" in candidate) == bool(german)]
+            return {"intent": intent, "code": (preferred or candidates)[0]}
+        return {"intent": None, "code": detokenize(self.generate(prompt, max_tokens=max_tokens))}
+
     def to_dict(self) -> dict:
         transitions = {context: dict(counter) for context, counter in self.counts.items()}
-        return {"format": "pypocket-ngram-v1", "order": self.order, "vocab": sorted(self.vocab), "transitions": transitions}
+        return {
+            "format": "pypocket-ngram-v2",
+            "order": self.order,
+            "vocab": sorted(self.vocab),
+            "prompt_vocab": sorted(self.prompt_vocab),
+            "intent_patterns": self.intent_patterns,
+            "templates": self.templates,
+            "transitions": transitions,
+        }
 
     @classmethod
     def from_dict(cls, payload: dict) -> "TinyPythonLM":
         model = cls(order=int(payload["order"]))
         model.vocab = set(payload.get("vocab", []))
+        model.prompt_vocab = set(payload.get("prompt_vocab", []))
+        model.intent_patterns = payload.get("intent_patterns", {})
+        model.templates = defaultdict(list, payload.get("templates", {}))
         model.counts = defaultdict(Counter, {context: Counter(values) for context, values in payload["transitions"].items()})
         return model
 
     def save(self, path: str | Path) -> None:
-        Path(path).write_text(json.dumps(self.to_dict(), indent=2, sort_keys=True), encoding="utf-8")
+        Path(path).write_text(json.dumps(self.to_dict(), indent=2, sort_keys=True, ensure_ascii=False), encoding="utf-8")
 
     @classmethod
     def load(cls, path: str | Path) -> "TinyPythonLM":
@@ -201,8 +259,9 @@ def main() -> None:
     exec(Path(args.data).read_text(encoding="utf-8"), namespace)
     examples = namespace["TRAINING_EXAMPLES"]
     model = TinyPythonLM().fit(examples, epochs=args.epochs)
+    model.fit_prompts(namespace.get("PROMPT_EXAMPLES", []))
     model.save(args.output)
-    print(f"trained examples={len(examples)} vocab={len(model.vocab)} output={args.output}")
+    print(f"trained code_examples={len(examples)} intents={len(model.intent_patterns)} vocab={len(model.vocab)} prompt_vocab={len(model.prompt_vocab)} output={args.output}")
 
 
 if __name__ == "__main__":

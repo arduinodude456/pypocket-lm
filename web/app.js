@@ -9,6 +9,10 @@ let model = null;
 const KEYWORDS = new Set('and as assert async await break case class continue def del elif else except finally for from global if import in is lambda match nonlocal not or pass raise return try while with yield True False None'.split(' '));
 const BUILTINS = new Set('print len range int str float list dict set sum min max'.split(' '));
 
+function normalTokenize(text) {
+  return (text.toLocaleLowerCase().match(/[\p{L}\p{N}_]+/gu) || []);
+}
+
 function tokenizePython(source) {
   const tokens = ['<BOS>'];
   const lines = source.replaceAll('\r', '').split('\n');
@@ -54,8 +58,7 @@ function detokenize(tokens) {
     if (token === '<INDENT>') { indent++; continue; }
     if (token === '<DEDENT>') { if (current.length) lines.push('    '.repeat(indent) + current.join(' ').trim()); current = []; indent = Math.max(0, indent - 1); continue; }
     if (token === '<NEWLINE>') { if (current.length) lines.push('    '.repeat(indent) + current.join(' ').trim()); current = []; continue; }
-    if (token.startsWith('KW:')) current.push(token.slice(3));
-    else if (token.startsWith('FN:')) current.push(token.slice(3));
+    if (token.startsWith('KW:') || token.startsWith('FN:')) current.push(token.slice(3));
     else if (token.startsWith('OP:')) { const op = token.slice(3); if ([',', ':', ')', ']', '}'].includes(op) && current.length) current[current.length - 1] += op; else current.push(op); }
     else if (token === 'NAME:<id>') current.push('value');
     else if (token === 'LIT:<str>') current.push('"text"');
@@ -65,7 +68,7 @@ function detokenize(tokens) {
   return lines.join('\n');
 }
 
-function generate(source, maxTokens = 42) {
+function codeContinuation(source, maxTokens = 42) {
   const history = tokenizePython(source);
   const generated = [];
   for (let index = 0; index < maxTokens; index++) {
@@ -77,13 +80,38 @@ function generate(source, maxTokens = 42) {
   return `${source.trimEnd()}\n${detokenize(generated)}`.trim();
 }
 
+function recognizeIntent(prompt) {
+  const words = new Set(normalTokenize(prompt));
+  let bestIntent = null;
+  let bestScore = 0;
+  for (const [intent, pattern] of Object.entries(model.intent_patterns || {})) {
+    const matches = pattern.filter(word => words.has(word));
+    const score = matches.reduce((sum, word) => sum + 1 / (1 + pattern.indexOf(word)), 0);
+    if (score > bestScore) { bestScore = score; bestIntent = intent; }
+  }
+  return bestIntent;
+}
+
+function generateForPrompt(prompt) {
+  const intent = recognizeIntent(prompt);
+  if (intent && model.templates?.[intent]) {
+    const candidates = Array.isArray(model.templates[intent]) ? model.templates[intent] : [model.templates[intent]];
+    const words = new Set(normalTokenize(prompt));
+    const german = ['hallo', 'welt', 'schreibe', 'beispiel', 'begrüße', 'begrüßen', 'summe', 'schleife'].some(word => words.has(word));
+    const preferred = candidates.filter(candidate => candidate.includes('Hallo') === german);
+    return { intent, code: (preferred.length ? preferred : candidates)[0] };
+  }
+  return { intent: null, code: codeContinuation(prompt) };
+}
+
 async function loadModel() {
   try {
     const response = await fetch('model.json', { cache: 'no-store' });
     if (!response.ok) throw new Error(`model.json returned ${response.status}`);
     model = await response.json();
-    statusEl.textContent = `model ready · ${model.vocab.length} tokens`;
-    statsEl.textContent = `${Object.keys(model.transitions).length} contexts · order ${model.order}`;
+    const intentCount = Object.keys(model.intent_patterns || {}).length;
+    statusEl.textContent = `model ready · ${model.vocab.length} code tokens · ${intentCount} prompt intents`;
+    statsEl.textContent = `${Object.keys(model.transitions).length} code contexts · ${model.prompt_vocab?.length || 0} text words`;
   } catch (error) {
     statusEl.textContent = 'model not found · run train.py';
     statusEl.classList.add('error');
@@ -93,7 +121,10 @@ async function loadModel() {
 
 function run() {
   if (!model) return;
-  resultEl.textContent = generate(promptEl.value || 'def greet(name):\n    ');
+  const prompt = promptEl.value.trim();
+  const result = generateForPrompt(prompt || 'def greet(name):\n    ');
+  resultEl.textContent = result.code;
+  statsEl.textContent = result.intent ? `intent matched · ${result.intent}` : 'code-prefix fallback · no intent matched';
 }
 
 runEl.addEventListener('click', run);

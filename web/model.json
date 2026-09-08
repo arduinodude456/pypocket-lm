@@ -1,6 +1,153 @@
 {
-  "format": "pypocket-ngram-v1",
+  "format": "pypocket-ngram-v2",
+  "intent_patterns": {
+    "fibonacci": [
+      "fibonacci",
+      "python",
+      "function",
+      "a",
+      "create",
+      "folge",
+      "erzeuge",
+      "in",
+      "die"
+    ],
+    "greeting_function": [
+      "function",
+      "python",
+      "greets",
+      "a",
+      "that",
+      "create",
+      "person",
+      "begrüsst",
+      "namen",
+      "baue",
+      "einen",
+      "eine",
+      "die",
+      "funktion"
+    ],
+    "hello_world": [
+      "hello",
+      "world",
+      "python",
+      "write",
+      "program",
+      "in",
+      "a",
+      "programm",
+      "welt",
+      "hallo",
+      "ein",
+      "schreibe",
+      "output",
+      "make"
+    ],
+    "range_loop": [
+      "loop",
+      "over",
+      "ten",
+      "one",
+      "python",
+      "in",
+      "from",
+      "numbers",
+      "to",
+      "zahlen",
+      "über",
+      "schleife",
+      "eine",
+      "schreibe"
+    ],
+    "sum_list": [
+      "sum",
+      "of",
+      "write",
+      "python",
+      "list",
+      "code",
+      "a",
+      "numbers",
+      "to",
+      "berechne",
+      "einer",
+      "die",
+      "summe",
+      "liste"
+    ]
+  },
   "order": 3,
+  "prompt_vocab": [
+    "a",
+    "baue",
+    "begrüsst",
+    "berechne",
+    "code",
+    "create",
+    "die",
+    "ein",
+    "eine",
+    "einen",
+    "einer",
+    "erzeuge",
+    "fibonacci",
+    "folge",
+    "from",
+    "function",
+    "funktion",
+    "greets",
+    "hallo",
+    "hello",
+    "in",
+    "list",
+    "liste",
+    "loop",
+    "make",
+    "namen",
+    "numbers",
+    "of",
+    "one",
+    "output",
+    "over",
+    "person",
+    "program",
+    "programm",
+    "python",
+    "schleife",
+    "schreibe",
+    "sum",
+    "summe",
+    "ten",
+    "that",
+    "to",
+    "welt",
+    "world",
+    "write",
+    "zahlen",
+    "über"
+  ],
+  "templates": {
+    "fibonacci": [
+      "def fibonacci(n):\n    a, b = 0, 1\n    for _ in range(n):\n        a, b = b, a + b\n    return a"
+    ],
+    "greeting_function": [
+      "def greet(name):\n    print(f\"Hello, {name}!\")",
+      "def begruessen(name):\n    print(f\"Hallo, {name}!\")"
+    ],
+    "hello_world": [
+      "print(\"Hello, World!\")",
+      "print(\"Hallo Welt\")"
+    ],
+    "range_loop": [
+      "for number in range(1, 11):\n    print(number)",
+      "for nummer in range(1, 11):\n    print(nummer)"
+    ],
+    "sum_list": [
+      "def sum_numbers(numbers):\n    return sum(numbers)",
+      "def summe(werte):\n    return sum(werte)"
+    ]
+  },
   "transitions": {
     "<BOS>": {
       "<BOS>": 20,
@@ -11,64 +158,64 @@
       "KW:try": 2,
       "NAME:<id>": 2
     },
-    "<BOS>\u241fKW:class": {
+    "<BOS>␟KW:class": {
       "NAME:<id>": 2
     },
-    "<BOS>\u241fKW:def": {
+    "<BOS>␟KW:def": {
       "NAME:<id>": 10
     },
-    "<BOS>\u241fKW:for": {
+    "<BOS>␟KW:for": {
       "NAME:<id>": 2
     },
-    "<BOS>\u241fKW:if": {
+    "<BOS>␟KW:if": {
       "NAME:<id>": 2
     },
-    "<BOS>\u241fKW:try": {
+    "<BOS>␟KW:try": {
       "OP::": 2
     },
-    "<BOS>\u241fNAME:<id>": {
+    "<BOS>␟NAME:<id>": {
       "OP:=": 2
     },
-    "<DEDENT>\u241f<DEDENT>": {
+    "<DEDENT>␟<DEDENT>": {
       "<END>": 2,
       "KW:return": 2
     },
-    "<DEDENT>\u241fFN:print": {
+    "<DEDENT>␟FN:print": {
       "OP:(": 2
     },
-    "<DEDENT>\u241fKW:def": {
+    "<DEDENT>␟KW:def": {
       "NAME:<id>": 2
     },
-    "<DEDENT>\u241fKW:else": {
+    "<DEDENT>␟KW:else": {
       "OP::": 2
     },
-    "<DEDENT>\u241fKW:except": {
+    "<DEDENT>␟KW:except": {
       "NAME:<id>": 2
     },
-    "<DEDENT>\u241fKW:return": {
+    "<DEDENT>␟KW:return": {
       "KW:None": 2
     },
-    "<INDENT>\u241fFN:print": {
+    "<INDENT>␟FN:print": {
       "OP:(": 8
     },
-    "<INDENT>\u241fKW:def": {
+    "<INDENT>␟KW:def": {
       "NAME:<id>": 2
     },
-    "<INDENT>\u241fKW:for": {
+    "<INDENT>␟KW:for": {
       "NAME:<id>": 2
     },
-    "<INDENT>\u241fKW:if": {
+    "<INDENT>␟KW:if": {
       "NAME:<id>": 2
     },
-    "<INDENT>\u241fKW:return": {
+    "<INDENT>␟KW:return": {
       "NAME:<id>": 6,
       "OP:f\"": 2
     },
-    "<INDENT>\u241fNAME:<id>": {
+    "<INDENT>␟NAME:<id>": {
       "OP:.": 4,
       "OP:=": 6
     },
-    "<NEWLINE>\u241f<DEDENT>": {
+    "<NEWLINE>␟<DEDENT>": {
       "<DEDENT>": 4,
       "<END>": 16,
       "FN:print": 2,
@@ -76,7 +223,7 @@
       "KW:else": 2,
       "KW:except": 2
     },
-    "<NEWLINE>\u241f<INDENT>": {
+    "<NEWLINE>␟<INDENT>": {
       "FN:print": 8,
       "KW:def": 2,
       "KW:for": 2,
@@ -84,181 +231,181 @@
       "KW:return": 8,
       "NAME:<id>": 10
     },
-    "<NEWLINE>\u241fKW:for": {
+    "<NEWLINE>␟KW:for": {
       "NAME:<id>": 2
     },
-    "FN:int\u241fOP:(": {
+    "FN:int␟OP:(": {
       "NAME:<id>": 2
     },
-    "FN:print\u241fOP:(": {
+    "FN:print␟OP:(": {
       "LIT:<str>": 6,
       "NAME:<id>": 4
     },
-    "KW:None\u241f<NEWLINE>": {
+    "KW:None␟<NEWLINE>": {
       "<DEDENT>": 2
     },
-    "KW:class\u241fNAME:<id>": {
+    "KW:class␟NAME:<id>": {
       "OP::": 2
     },
-    "KW:def\u241fNAME:<id>": {
+    "KW:def␟NAME:<id>": {
       "OP:(": 14
     },
-    "KW:else\u241fOP::": {
+    "KW:else␟OP::": {
       "<NEWLINE>": 2
     },
-    "KW:except\u241fNAME:<id>": {
+    "KW:except␟NAME:<id>": {
       "OP::": 2
     },
-    "KW:for\u241fNAME:<id>": {
+    "KW:for␟NAME:<id>": {
       "KW:in": 6
     },
-    "KW:if\u241fNAME:<id>": {
+    "KW:if␟NAME:<id>": {
       "OP:==": 2,
       "OP:>=": 2
     },
-    "KW:in\u241fNAME:<id>": {
+    "KW:in␟NAME:<id>": {
       "OP::": 6
     },
-    "KW:return\u241fKW:None": {
+    "KW:return␟KW:None": {
       "<NEWLINE>": 2
     },
-    "KW:return\u241fNAME:<id>": {
+    "KW:return␟NAME:<id>": {
       "<NEWLINE>": 2,
       "OP:%": 2,
       "OP:+": 2
     },
-    "KW:return\u241fOP:f\"": {
+    "KW:return␟OP:f\"": {
       "OP:Hello ": 2
     },
-    "KW:try\u241fOP::": {
+    "KW:try␟OP::": {
       "<NEWLINE>": 2
     },
-    "LIT:<num>\u241f<NEWLINE>": {
+    "LIT:<num>␟<NEWLINE>": {
       "<DEDENT>": 8,
       "KW:for": 2
     },
-    "LIT:<num>\u241fOP::": {
+    "LIT:<num>␟OP::": {
       "<NEWLINE>": 2
     },
-    "LIT:<num>\u241fOP:==": {
+    "LIT:<num>␟OP:==": {
       "LIT:<num>": 2
     },
-    "LIT:<str>\u241fOP:)": {
+    "LIT:<str>␟OP:)": {
       "<NEWLINE>": 4
     },
-    "LIT:<str>\u241fOP:,": {
+    "LIT:<str>␟OP:,": {
       "NAME:<id>": 2
     },
-    "NAME:<id>\u241f<NEWLINE>": {
+    "NAME:<id>␟<NEWLINE>": {
       "<DEDENT>": 6
     },
-    "NAME:<id>\u241fKW:in": {
+    "NAME:<id>␟KW:in": {
       "NAME:<id>": 6
     },
-    "NAME:<id>\u241fOP:%": {
+    "NAME:<id>␟OP:%": {
       "LIT:<num>": 2
     },
-    "NAME:<id>\u241fOP:(": {
+    "NAME:<id>␟OP:(": {
       "NAME:<id>": 14
     },
-    "NAME:<id>\u241fOP:)": {
+    "NAME:<id>␟OP:)": {
       "<NEWLINE>": 8,
       "OP::": 14
     },
-    "NAME:<id>\u241fOP:+": {
+    "NAME:<id>␟OP:+": {
       "NAME:<id>": 4
     },
-    "NAME:<id>\u241fOP:+=": {
+    "NAME:<id>␟OP:+=": {
       "LIT:<num>": 2
     },
-    "NAME:<id>\u241fOP:,": {
+    "NAME:<id>␟OP:,": {
       "NAME:<id>": 4
     },
-    "NAME:<id>\u241fOP:.": {
+    "NAME:<id>␟OP:.": {
       "NAME:<id>": 4
     },
-    "NAME:<id>\u241fOP::": {
+    "NAME:<id>␟OP::": {
       "<NEWLINE>": 12
     },
-    "NAME:<id>\u241fOP:=": {
+    "NAME:<id>␟OP:=": {
       "FN:int": 2,
       "LIT:<num>": 6,
       "NAME:<id>": 2
     },
-    "NAME:<id>\u241fOP:==": {
+    "NAME:<id>␟OP:==": {
       "NAME:<id>": 2
     },
-    "NAME:<id>\u241fOP:>=": {
+    "NAME:<id>␟OP:>=": {
       "LIT:<num>": 2
     },
-    "NAME:<id>\u241fOP:}": {
+    "NAME:<id>␟OP:}": {
       "OP:\"": 2
     },
-    "OP:\"\u241f<NEWLINE>": {
+    "OP:\"␟<NEWLINE>": {
       "<DEDENT>": 2
     },
-    "OP:%\u241fLIT:<num>": {
+    "OP:%␟LIT:<num>": {
       "OP:==": 2
     },
-    "OP:(\u241fLIT:<str>": {
+    "OP:(␟LIT:<str>": {
       "OP:)": 4,
       "OP:,": 2
     },
-    "OP:(\u241fNAME:<id>": {
+    "OP:(␟NAME:<id>": {
       "OP:)": 16,
       "OP:,": 4
     },
-    "OP:)\u241f<NEWLINE>": {
+    "OP:)␟<NEWLINE>": {
       "<DEDENT>": 10,
       "<END>": 2
     },
-    "OP:)\u241fOP::": {
+    "OP:)␟OP::": {
       "<NEWLINE>": 14
     },
-    "OP:+=\u241fLIT:<num>": {
+    "OP:+=␟LIT:<num>": {
       "<NEWLINE>": 2
     },
-    "OP:+\u241fNAME:<id>": {
+    "OP:+␟NAME:<id>": {
       "<NEWLINE>": 4
     },
-    "OP:,\u241fNAME:<id>": {
+    "OP:,␟NAME:<id>": {
       "OP:)": 6
     },
-    "OP:.\u241fNAME:<id>": {
+    "OP:.␟NAME:<id>": {
       "OP:+=": 2,
       "OP:=": 2
     },
-    "OP::\u241f<NEWLINE>": {
+    "OP::␟<NEWLINE>": {
       "<INDENT>": 32
     },
-    "OP:==\u241fLIT:<num>": {
+    "OP:==␟LIT:<num>": {
       "<NEWLINE>": 2
     },
-    "OP:==\u241fNAME:<id>": {
+    "OP:==␟NAME:<id>": {
       "OP::": 2
     },
-    "OP:=\u241fFN:int": {
+    "OP:=␟FN:int": {
       "OP:(": 2
     },
-    "OP:=\u241fLIT:<num>": {
+    "OP:=␟LIT:<num>": {
       "<NEWLINE>": 6
     },
-    "OP:=\u241fNAME:<id>": {
+    "OP:=␟NAME:<id>": {
       "OP:+": 2
     },
-    "OP:>=\u241fLIT:<num>": {
+    "OP:>=␟LIT:<num>": {
       "OP::": 2
     },
-    "OP:Hello \u241fOP:{": {
+    "OP:Hello ␟OP:{": {
       "NAME:<id>": 2
     },
-    "OP:f\"\u241fOP:Hello ": {
+    "OP:f\"␟OP:Hello ": {
       "OP:{": 2
     },
-    "OP:{\u241fNAME:<id>": {
+    "OP:{␟NAME:<id>": {
       "OP:}": 2
     },
-    "OP:}\u241fOP:\"": {
+    "OP:}␟OP:\"": {
       "<NEWLINE>": 2
     }
   },
