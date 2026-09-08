@@ -6,6 +6,10 @@ on:
     paths:
       - 'data/**'
       - 'tiny_python_lm.py'
+      - 'ir.py'
+      - 'ir_model.py'
+      - 'train_ir.py'
+      - 'tests/**'
       - 'train.py'
       - 'web/**'
       - '.github/workflows/train.yml'
@@ -32,6 +36,8 @@ jobs:
         run: python train.py --epochs 2
       - name: Run tests
         run: python -m unittest discover -s tests -v
+      - name: Train compositional IR model
+        run: python train_ir.py --output web/ir_model.json --metrics web/metrics.json
       - name: Publish static demo branch
         uses: peaceiris/actions-gh-pages@v4
         with:

@@ -4,13 +4,32 @@ const statusEl = document.querySelector('#model-status');
 const statsEl = document.querySelector('#stats');
 const runEl = document.querySelector('#run');
 const copyEl = document.querySelector('#copy');
+const creativeEl = document.querySelector('#creative');
 
 let model = null;
+let irModel = null;
+let creativeMode = false;
 const KEYWORDS = new Set('and as assert async await break case class continue def del elif else except finally for from global if import in is lambda match nonlocal not or pass raise return try while with yield True False None'.split(' '));
 const BUILTINS = new Set('print len range int str float list dict set sum min max'.split(' '));
 
 function normalTokenize(text) {
   return (text.toLocaleLowerCase().match(/[\p{L}\p{N}_]+/gu) || []);
+}
+
+function conceptTokens(prompt) {
+  const tokens = [];
+  for (const word of normalTokenize(prompt)) {
+    if (['setze', 'speichere', 'set', 'save'].includes(word)) tokens.push('CONCEPT:SET');
+    else if (['addiert', 'addiere', 'add', 'plus'].includes(word)) tokens.push('CONCEPT:ADD');
+    else if (['subtrahiert', 'subtrahiere', 'sub', 'minus'].includes(word)) tokens.push('CONCEPT:SUB');
+    else if (['multipliziert', 'multipliziere', 'multiply', 'mul', 'times'].includes(word)) tokens.push('CONCEPT:MUL');
+    else if (['teilt', 'teile', 'divide', 'div', 'geteilt'].includes(word)) tokens.push('CONCEPT:DIV');
+    else if (['schleife', 'loop', 'for'].includes(word)) tokens.push('CONCEPT:FOR_RANGE');
+    else if (['aus', 'gib', 'gibt', 'print', 'output', 'ausgabe'].includes(word)) tokens.push('CONCEPT:PRINT');
+    else if (/^\d+$/.test(word)) tokens.push(`NUM:${word}`);
+    else if (['x', 'total', 'wert', 'i', 'number', 'item'].includes(word)) tokens.push(`VAR:${word}`);
+  }
+  return tokens;
 }
 
 function tokenizePython(source) {
@@ -104,14 +123,51 @@ function generateForPrompt(prompt) {
   return { intent: null, code: codeContinuation(prompt) };
 }
 
+function irNext(history) {
+  const context = history.slice(-(irModel.order - 1)).join('␟');
+  const entries = Object.entries(irModel.transitions[context] || {}).sort((a, b) => b[1] - a[1]);
+  return entries.length ? entries[0][0] : '<END>';
+}
+
+function compileIR(tokens) {
+  const lines = [];
+  let indent = 0;
+  const value = raw => raw.split(':').slice(1).join(':').replaceAll('_', ' ');
+  for (let i = 0; i < tokens.length;) {
+    const token = tokens[i];
+    if (['<END>', '<NL>', '<BOS>'].includes(token)) { i++; continue; }
+    const prefix = '    '.repeat(indent);
+    if (token === 'SET') { lines.push(`${prefix}${value(tokens[i + 1])} = ${value(tokens[i + 2])}`); i += 3; }
+    else if (['ADD', 'SUB', 'MUL', 'DIV'].includes(token)) { const op = {ADD: '+', SUB: '-', MUL: '*', DIV: '/'}[token]; lines.push(`${prefix}${value(tokens[i + 1])} = ${value(tokens[i + 1])} ${op} ${value(tokens[i + 2])}`); i += 3; }
+    else if (token === 'PRINT') { lines.push(`${prefix}print(${value(tokens[i + 1])})`); i += 2; }
+    else if (token === 'FOR_RANGE') { lines.push(`${prefix}for ${value(tokens[i + 1])} in range(${value(tokens[i + 2])}):`); indent++; i += 3; }
+    else if (token === 'END_FOR') { indent = Math.max(0, indent - 1); i++; }
+    else i++;
+  }
+  return lines.join('\n') + (lines.length ? '\n' : '');
+}
+
+function generateCreative(prompt) {
+  const history = ['<BOS>', '<PROMPT>', ...conceptTokens(prompt), '<IR>'];
+  const output = [];
+  for (let index = 0; index < 48; index++) {
+    const token = irNext(history);
+    output.push(token); history.push(token);
+    if (token === '<END>') break;
+  }
+  return { intent: 'creative-ir', code: compileIR(output) };
+}
+
 async function loadModel() {
   try {
     const response = await fetch('model.json', { cache: 'no-store' });
     if (!response.ok) throw new Error(`model.json returned ${response.status}`);
     model = await response.json();
+    const irResponse = await fetch('ir_model.json', { cache: 'no-store' });
+    if (irResponse.ok) irModel = await irResponse.json();
     const intentCount = Object.keys(model.intent_patterns || {}).length;
     statusEl.textContent = `model ready · ${model.vocab.length} code tokens · ${intentCount} prompt intents`;
-    statsEl.textContent = `${Object.keys(model.transitions).length} code contexts · ${model.prompt_vocab?.length || 0} text words`;
+    statsEl.textContent = `${Object.keys(model.transitions).length} code contexts · ${model.prompt_vocab?.length || 0} text words · ${irModel ? 'IR ready' : 'IR unavailable'}`;
   } catch (error) {
     statusEl.textContent = 'model not found · run train.py';
     statusEl.classList.add('error');
@@ -122,12 +178,16 @@ async function loadModel() {
 function run() {
   if (!model) return;
   const prompt = promptEl.value.trim();
-  const result = generateForPrompt(prompt || 'def greet(name):\n    ');
+  const result = creativeMode && irModel ? generateCreative(prompt) : generateForPrompt(prompt || 'def greet(name):\n    ');
   resultEl.textContent = result.code;
   statsEl.textContent = result.intent ? `intent matched · ${result.intent}` : 'code-prefix fallback · no intent matched';
 }
 
 runEl.addEventListener('click', run);
+creativeEl.addEventListener('click', () => {
+  creativeMode = !creativeMode;
+  creativeEl.textContent = `Creative IR: ${creativeMode ? 'on' : 'off'}`;
+});
 promptEl.addEventListener('keydown', event => { if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') run(); });
 copyEl.addEventListener('click', async () => { await navigator.clipboard.writeText(resultEl.textContent); copyEl.textContent = 'Copied'; setTimeout(() => copyEl.textContent = 'Copy', 1200); });
 loadModel();

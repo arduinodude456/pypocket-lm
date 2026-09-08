@@ -18,10 +18,24 @@ Die GitHub-Action trainiert ausschließlich mit Python-Standardbibliothek. Das e
 - Aus einem Prompt eine kurze Tokenfolge vervollständigen.
 - Das Modell direkt im Browser laden und ausführen.
 - Neue persönliche Trainingsbeispiele über `data/examples.py` ergänzen.
+- Eine experimentelle kompakte Python-IR erzeugen (`SET`, `ADD`, `MUL`, `PRINT`, `FOR_RANGE` usw.).
+- IR mit einem autoregressiven Next-Token-n-Gramm-Modell erzeugen und durch einen deterministischen Compiler in Python übersetzen.
+- Trainings- und unbekannte Kompositionsaufgaben getrennt evaluieren (`web/metrics.json`).
 
 ## Was er noch nicht kann
 
 Dies ist **kein ChatGPT-ähnliches Large Language Model**. Der Prompt-Layer ist eine kleine, trainierte Intent-/Template-Komponente und kein vollständiges semantisches Sprachmodell. Unbekannte Prompts fallen auf die Code-Fortsetzung zurück; komplexe Anforderungen, vollständige Bibliothekskenntnis und zuverlässig produktionsreifer Code sind noch nicht garantiert. Die Architektur ist absichtlich klein, erklärbar und kostenlos, damit Training und Inferenz auf begrenzter Hardware möglich bleiben.
+
+Die IR-Erweiterung ist der ehrlichere Generalisierungsversuch: Der Prompt wird in Konzept-Tokens zerlegt, das autoregressive Modell erzeugt anschließend IR Token für Token, und der Compiler erzeugt daraus Python. Im aktuellen reproduzierbaren Lauf lag die exakte Trefferquote auf den Trainingsaufgaben bei 100 %, auf unbekannten synthetischen Kombinationen bei 21,7 %. Gleichzeitig waren 100 % der erzeugten Validierungs-IRs und 100 % der daraus kompilierten Python-Ausgaben syntaktisch gültig. Das zeigt echte Komposition mit noch schwacher semantischer Genauigkeit – nicht „fertige Intelligenz“.
+
+## IR-Training und Evaluation
+
+```bash
+python3 train_ir.py --output web/ir_model.json --metrics web/metrics.json
+python3 -m unittest discover -s tests -v
+```
+
+Die Evaluation trennt Training von unbekannten Kombinationen und misst Cross-Entropy, exakte IR-Übereinstimmung, IR-Validität und AST-basierte Python-Syntax. Die Browser-Demo bietet dafür den Schalter **Creative IR**. Generierten Code niemals ungeprüft ausführen.
 
 ## Lokal starten
 
