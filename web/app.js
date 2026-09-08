@@ -159,7 +159,16 @@ function generateCreative(prompt) {
     output.push(token); history.push(token);
     if (token === '<END>') break;
   }
-  const code = compileIR(output);
+  const promptNumbers = normalTokenize(prompt).filter(word => /^\d+$/.test(word));
+  const promptVariables = normalTokenize(prompt).filter(word => ['x', 'total', 'wert', 'i', 'number', 'item'].includes(word));
+  let numberIndex = 0;
+  let variableIndex = 0;
+  const boundOutput = output.map(token => {
+    if (token.startsWith('NUM:') && promptNumbers[numberIndex] !== undefined) return `NUM:${promptNumbers[numberIndex++]}`;
+    if (token.startsWith('VAR:') && promptVariables[variableIndex] !== undefined) return `VAR:${promptVariables[variableIndex++]}`;
+    return token;
+  });
+  const code = compileIR(boundOutput);
   return { intent: 'creative-ir', code: code || '# Keine gültige IR-Fortsetzung gefunden. Bitte Prompt vereinfachen.' };
 }
 
