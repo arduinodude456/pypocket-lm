@@ -1,0 +1,430 @@
+{
+  "format": "pypocket-ngram-v2",
+  "intent_patterns": {
+    "fibonacci": [
+      "fibonacci",
+      "python",
+      "create",
+      "function",
+      "a",
+      "erzeuge",
+      "die",
+      "in",
+      "folge"
+    ],
+    "greeting_function": [
+      "that",
+      "person",
+      "python",
+      "create",
+      "greets",
+      "function",
+      "a",
+      "einen",
+      "funktion",
+      "die",
+      "namen",
+      "begrüsst",
+      "baue",
+      "eine"
+    ],
+    "hello_world": [
+      "world",
+      "python",
+      "hello",
+      "program",
+      "write",
+      "in",
+      "a",
+      "programm",
+      "ein",
+      "hallo",
+      "schreibe",
+      "welt",
+      "make",
+      "output"
+    ],
+    "range_loop": [
+      "from",
+      "numbers",
+      "python",
+      "in",
+      "over",
+      "ten",
+      "to",
+      "loop",
+      "one",
+      "eine",
+      "schreibe",
+      "zahlen",
+      "schleife",
+      "über"
+    ],
+    "sum_list": [
+      "write",
+      "sum",
+      "of",
+      "numbers",
+      "python",
+      "to",
+      "list",
+      "code",
+      "a",
+      "summe",
+      "die",
+      "liste",
+      "einer",
+      "berechne"
+    ]
+  },
+  "order": 3,
+  "prompt_vocab": [
+    "a",
+    "baue",
+    "begrüsst",
+    "berechne",
+    "code",
+    "create",
+    "die",
+    "ein",
+    "eine",
+    "einen",
+    "einer",
+    "erzeuge",
+    "fibonacci",
+    "folge",
+    "from",
+    "function",
+    "funktion",
+    "greets",
+    "hallo",
+    "hello",
+    "in",
+    "list",
+    "liste",
+    "loop",
+    "make",
+    "namen",
+    "numbers",
+    "of",
+    "one",
+    "output",
+    "over",
+    "person",
+    "program",
+    "programm",
+    "python",
+    "schleife",
+    "schreibe",
+    "sum",
+    "summe",
+    "ten",
+    "that",
+    "to",
+    "welt",
+    "world",
+    "write",
+    "zahlen",
+    "über"
+  ],
+  "templates": {
+    "fibonacci": [
+      "def fibonacci(n):\n    a, b = 0, 1\n    for _ in range(n):\n        a, b = b, a + b\n    return a"
+    ],
+    "greeting_function": [
+      "def greet(name):\n    print(f\"Hello, {name}!\")",
+      "def begruessen(name):\n    print(f\"Hallo, {name}!\")"
+    ],
+    "hello_world": [
+      "print(\"Hello, World!\")",
+      "print(\"Hallo Welt\")"
+    ],
+    "range_loop": [
+      "for number in range(1, 11):\n    print(number)",
+      "for nummer in range(1, 11):\n    print(nummer)"
+    ],
+    "sum_list": [
+      "def sum_numbers(numbers):\n    return sum(numbers)",
+      "def summe(werte):\n    return sum(werte)"
+    ]
+  },
+  "transitions": {
+    "<BOS>": {
+      "<BOS>": 20,
+      "KW:class": 2,
+      "KW:def": 10,
+      "KW:for": 2,
+      "KW:if": 2,
+      "KW:try": 2,
+      "NAME:<id>": 2
+    },
+    "<BOS>␟KW:class": {
+      "NAME:<id>": 2
+    },
+    "<BOS>␟KW:def": {
+      "NAME:<id>": 10
+    },
+    "<BOS>␟KW:for": {
+      "NAME:<id>": 2
+    },
+    "<BOS>␟KW:if": {
+      "NAME:<id>": 2
+    },
+    "<BOS>␟KW:try": {
+      "OP::": 2
+    },
+    "<BOS>␟NAME:<id>": {
+      "OP:=": 2
+    },
+    "<DEDENT>␟<DEDENT>": {
+      "<END>": 2,
+      "KW:return": 2
+    },
+    "<DEDENT>␟FN:print": {
+      "OP:(": 2
+    },
+    "<DEDENT>␟KW:def": {
+      "NAME:<id>": 2
+    },
+    "<DEDENT>␟KW:else": {
+      "OP::": 2
+    },
+    "<DEDENT>␟KW:except": {
+      "NAME:<id>": 2
+    },
+    "<DEDENT>␟KW:return": {
+      "KW:None": 2
+    },
+    "<INDENT>␟FN:print": {
+      "OP:(": 8
+    },
+    "<INDENT>␟KW:def": {
+      "NAME:<id>": 2
+    },
+    "<INDENT>␟KW:for": {
+      "NAME:<id>": 2
+    },
+    "<INDENT>␟KW:if": {
+      "NAME:<id>": 2
+    },
+    "<INDENT>␟KW:return": {
+      "LIT:<str>": 2,
+      "NAME:<id>": 6
+    },
+    "<INDENT>␟NAME:<id>": {
+      "OP:.": 4,
+      "OP:=": 6
+    },
+    "<NEWLINE>␟<DEDENT>": {
+      "<DEDENT>": 4,
+      "<END>": 16,
+      "FN:print": 2,
+      "KW:def": 2,
+      "KW:else": 2,
+      "KW:except": 2
+    },
+    "<NEWLINE>␟<INDENT>": {
+      "FN:print": 8,
+      "KW:def": 2,
+      "KW:for": 2,
+      "KW:if": 2,
+      "KW:return": 8,
+      "NAME:<id>": 10
+    },
+    "<NEWLINE>␟KW:for": {
+      "NAME:<id>": 2
+    },
+    "FN:int␟OP:(": {
+      "NAME:<id>": 2
+    },
+    "FN:print␟OP:(": {
+      "LIT:<str>": 6,
+      "NAME:<id>": 4
+    },
+    "KW:None␟<NEWLINE>": {
+      "<DEDENT>": 2
+    },
+    "KW:class␟NAME:<id>": {
+      "OP::": 2
+    },
+    "KW:def␟NAME:<id>": {
+      "OP:(": 14
+    },
+    "KW:else␟OP::": {
+      "<NEWLINE>": 2
+    },
+    "KW:except␟NAME:<id>": {
+      "OP::": 2
+    },
+    "KW:for␟NAME:<id>": {
+      "KW:in": 6
+    },
+    "KW:if␟NAME:<id>": {
+      "OP:==": 2,
+      "OP:>=": 2
+    },
+    "KW:in␟NAME:<id>": {
+      "OP::": 6
+    },
+    "KW:return␟KW:None": {
+      "<NEWLINE>": 2
+    },
+    "KW:return␟LIT:<str>": {
+      "<NEWLINE>": 2
+    },
+    "KW:return␟NAME:<id>": {
+      "<NEWLINE>": 2,
+      "OP:%": 2,
+      "OP:+": 2
+    },
+    "KW:try␟OP::": {
+      "<NEWLINE>": 2
+    },
+    "LIT:<num>␟<NEWLINE>": {
+      "<DEDENT>": 8,
+      "KW:for": 2
+    },
+    "LIT:<num>␟OP::": {
+      "<NEWLINE>": 2
+    },
+    "LIT:<num>␟OP:==": {
+      "LIT:<num>": 2
+    },
+    "LIT:<str>␟<NEWLINE>": {
+      "<DEDENT>": 2
+    },
+    "LIT:<str>␟OP:)": {
+      "<NEWLINE>": 4
+    },
+    "LIT:<str>␟OP:,": {
+      "NAME:<id>": 2
+    },
+    "NAME:<id>␟<NEWLINE>": {
+      "<DEDENT>": 6
+    },
+    "NAME:<id>␟KW:in": {
+      "NAME:<id>": 6
+    },
+    "NAME:<id>␟OP:%": {
+      "LIT:<num>": 2
+    },
+    "NAME:<id>␟OP:(": {
+      "NAME:<id>": 14
+    },
+    "NAME:<id>␟OP:)": {
+      "<NEWLINE>": 8,
+      "OP::": 14
+    },
+    "NAME:<id>␟OP:+": {
+      "NAME:<id>": 4
+    },
+    "NAME:<id>␟OP:+=": {
+      "LIT:<num>": 2
+    },
+    "NAME:<id>␟OP:,": {
+      "NAME:<id>": 4
+    },
+    "NAME:<id>␟OP:.": {
+      "NAME:<id>": 4
+    },
+    "NAME:<id>␟OP::": {
+      "<NEWLINE>": 12
+    },
+    "NAME:<id>␟OP:=": {
+      "FN:int": 2,
+      "LIT:<num>": 6,
+      "NAME:<id>": 2
+    },
+    "NAME:<id>␟OP:==": {
+      "NAME:<id>": 2
+    },
+    "NAME:<id>␟OP:>=": {
+      "LIT:<num>": 2
+    },
+    "OP:%␟LIT:<num>": {
+      "OP:==": 2
+    },
+    "OP:(␟LIT:<str>": {
+      "OP:)": 4,
+      "OP:,": 2
+    },
+    "OP:(␟NAME:<id>": {
+      "OP:)": 16,
+      "OP:,": 4
+    },
+    "OP:)␟<NEWLINE>": {
+      "<DEDENT>": 10,
+      "<END>": 2
+    },
+    "OP:)␟OP::": {
+      "<NEWLINE>": 14
+    },
+    "OP:+=␟LIT:<num>": {
+      "<NEWLINE>": 2
+    },
+    "OP:+␟NAME:<id>": {
+      "<NEWLINE>": 4
+    },
+    "OP:,␟NAME:<id>": {
+      "OP:)": 6
+    },
+    "OP:.␟NAME:<id>": {
+      "OP:+=": 2,
+      "OP:=": 2
+    },
+    "OP::␟<NEWLINE>": {
+      "<INDENT>": 32
+    },
+    "OP:==␟LIT:<num>": {
+      "<NEWLINE>": 2
+    },
+    "OP:==␟NAME:<id>": {
+      "OP::": 2
+    },
+    "OP:=␟FN:int": {
+      "OP:(": 2
+    },
+    "OP:=␟LIT:<num>": {
+      "<NEWLINE>": 6
+    },
+    "OP:=␟NAME:<id>": {
+      "OP:+": 2
+    },
+    "OP:>=␟LIT:<num>": {
+      "OP::": 2
+    }
+  },
+  "vocab": [
+    "<BOS>",
+    "<DEDENT>",
+    "<END>",
+    "<INDENT>",
+    "<NEWLINE>",
+    "FN:int",
+    "FN:print",
+    "KW:None",
+    "KW:class",
+    "KW:def",
+    "KW:else",
+    "KW:except",
+    "KW:for",
+    "KW:if",
+    "KW:in",
+    "KW:return",
+    "KW:try",
+    "LIT:<num>",
+    "LIT:<str>",
+    "NAME:<id>",
+    "OP:%",
+    "OP:(",
+    "OP:)",
+    "OP:+",
+    "OP:+=",
+    "OP:,",
+    "OP:.",
+    "OP::",
+    "OP:=",
+    "OP:==",
+    "OP:>="
+  ]
+}
