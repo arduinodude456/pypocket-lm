@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PyPocket LM — browser Python model</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar"><div class="brand"><span class="mark">›_</span><span>PyPocket <b>LM</b></span></div><span class="status"><i></i> browser-local inference</span></header>
+  <main class="shell">
+    <section class="hero"><p class="eyebrow">PYTHON-SPECIALIZED · JSON WEIGHTS · ZERO API CALLS</p><h1>A tiny model that<br><em>runs in your browser.</em></h1><p class="lede">An experimental Python generator trained by GitHub Actions and loaded as a compact JSON artifact. No account. No server. No prompt leaves this device.</p></section>
+    <section class="workbench">
+      <div class="panel-head"><div><span class="label">Prompt / Python prefix</span><span id="model-status" class="model-status">loading model…</span></div><button id="run" class="run">Generate <span>⌘ ↵</span></button></div>
+      <textarea id="prompt" spellcheck="false" placeholder="def greet(name):\n    ">def greet(name):
+    </textarea>
+      <div class="panel-foot"><span>Try a Python prefix, not a natural-language question.</span><span id="stats">—</span></div>
+    </section>
+    <section class="output"><div class="output-head"><span class="label">Generated continuation</span><button id="copy" class="copy">Copy</button></div><pre id="result">Your generated code will appear here.</pre></section>
+    <section class="notes"><article><span class="num">01</span><div><h2>Compact tokens</h2><p>Keywords become structural tokens like <code>KW:def</code> and indentation becomes <code>&lt;INDENT&gt;</code>. This keeps the experiment transparent.</p></div></article><article><span class="num">02</span><div><h2>GitHub-trained artifact</h2><p>Every training run exports <code>model.json</code>. GitHub Pages serves the static demo and the browser loads the same artifact.</p></div></article><article><span class="num">03</span><div><h2>Honest prototype</h2><p>This is an explainable n-gram baseline, not a general LLM. It is a foundation for future WebGPU or quantized neural models.</p></div></article></section>
+  </main>
+  <footer>PyPocket LM · open experiment · <a href="https://github.com" target="_blank" rel="noreferrer">GitHub Actions ready</a></footer>
+  <script src="app.js" type="module"></script>
+</body>
+</html>
