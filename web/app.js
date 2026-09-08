@@ -100,7 +100,8 @@ function codeContinuation(source, maxTokens = 42) {
 }
 
 function recognizeIntent(prompt) {
-  const words = new Set(normalTokenize(prompt));
+  const stopwords = new Set(['a', 'an', 'the', 'in', 'on', 'of', 'to', 'and', 'ein', 'eine', 'einen', 'der', 'die', 'das', 'für', 'mit', 'und', 'zu']);
+  const words = new Set(normalTokenize(prompt).filter(word => !stopwords.has(word)));
   let bestIntent = null;
   let bestScore = 0;
   for (const [intent, pattern] of Object.entries(model.intent_patterns || {})) {

@@ -33,6 +33,7 @@ KEYWORDS = {
 }
 BUILTINS = {"print", "len", "range", "int", "str", "float", "list", "dict", "set", "sum", "min", "max"}
 WORD_RE = re.compile(r"[\wäöüß]+", re.IGNORECASE)
+STOPWORDS = {"a", "an", "the", "in", "on", "of", "to", "and", "ein", "eine", "einen", "der", "die", "das", "für", "mit", "und", "zu"}
 
 
 def normal_tokenize(text: str) -> list[str]:
@@ -159,7 +160,7 @@ class TinyPythonLM:
         return self
 
     def recognize_intent(self, prompt: str) -> str | None:
-        words = set(normal_tokenize(prompt))
+        words = set(normal_tokenize(prompt)) - STOPWORDS
         best_intent, best_score = None, 0.0
         for intent, pattern in self.intent_patterns.items():
             matches = words.intersection(pattern)
